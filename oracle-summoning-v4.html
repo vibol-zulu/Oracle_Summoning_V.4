@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oracle Summoning · Portal &amp; Bloom (refined)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fcfbf7;
+      --text: #1a1a1a;
+      --text-muted: #6b665c;
+      --border: #e8e4dc;
+      --pink: #eb4a8d;
+      --pink-soft: #fce8f0;
+      --grey: #e8e8e8;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 400;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Subtle warmth: grain + faint pink ambient near centre */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.018) 1px, transparent 0);
+      background-size: 3px 3px;
+      opacity: 0.55;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse at 50% 55%, rgba(235, 74, 141, 0.04), transparent 55%);
+    }
+
+    main.page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 4rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      text-align: left;
+    }
+
+    .kicker {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65em;
+    }
+
+    .kicker-flag {
+      display: inline-block;
+      height: 12px;
+      width: auto;
+      border-radius: 1px;
+      vertical-align: middle;
+    }
+
+    h1 {
+      font-family: Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.015em;
+      margin-bottom: 1rem;
+      white-space: nowrap;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: inherit;
+      font-weight: 400;
+    }
+
+    .lead {
+      font-size: 1rem;
+      color: var(--text-muted);
+      width: 100%;
+      margin: 0 0 3rem;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    /* ── Scene wrapper: fixed footprint, panels stack inside ── */
+    .scene-wrapper {
+      position: relative;
+      width: 100%;
+      /* tall enough for GIF + button beneath it */
+      height: 440px;
+      flex-shrink: 0;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    /* Both panels fill the wrapper and sit on top of each other */
+    .intro-panel,
+    .oracle-panel {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Intro: GIF on top, button-group below */
+    .intro-panel .hero-gif {
+      display: block;
+      width: 680px;
+      max-width: none;
+      height: auto;
+      max-height: 320px;
+      object-fit: contain;
+      object-position: left bottom;
+      flex-shrink: 0;
+    }
+
+    .intro-panel .button-group {
+      margin-top: 2.5rem;
+    }
+
+    .intro-panel.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Oracle panel: transition to chat mode */
+    .oracle-panel {
+      align-items: flex-start;
+      justify-content: flex-start;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .oracle-panel.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .chat-interface {
+      display: flex;
+      align-items: center;
+      /* Centered with the single bubble */
+      gap: 1.2rem;
+      width: 100%;
+      margin-bottom: 2rem;
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .oracle-stage {
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Shrink state */
+    .oracle-panel.is-chatting .oracle-stage {
+      width: 80px;
+      height: 80px;
+    }
+
+    .oracle {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .chat-bubbles {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+      flex: 1;
+    }
+
+    .oracle-panel.is-chatting .chat-bubbles {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bubble {
+      background: #f0f2f5;
+      padding: 0 1.6rem;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      border-radius: 1.2rem;
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.4;
+      max-width: none;
+      position: relative;
+    }
+
+    .summoning-text {
+      position: absolute;
+      top: 240px;
+      /* Below the 200px oracle */
+      left: 100px;
+      /* Center-ish relative to oracle-stage */
+      transform: translateX(-50%);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--text);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      text-align: center;
+      width: 200px;
+      transition: opacity 0.5s ease;
+    }
+
+    .oracle-panel.visible .summoning-text {
+      opacity: 0.8;
+    }
+
+    .oracle-panel.is-chatting .summoning-text {
+      opacity: 0;
+    }
+
+    /* User Interaction Zone (Fades in after chat bubbles) */
+    .user-interaction-zone {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: flex-end;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+
+    .oracle-panel.is-ready .user-interaction-zone {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+      align-items: center;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+      background: #fff;
+      border: 1px solid #cdebe7;
+      border-radius: 2rem;
+      padding: 0.6rem 0.6rem 0.6rem 1.5rem;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #cdebe7;
+      box-shadow: 0 0 0 2px rgba(205, 235, 231, 0.4), 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-input-field {
+      border: none;
+      outline: none;
+      flex: 1;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .user-input-field::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .submit-btn {
+      background: #f0f2f5;
+      border: none;
+      border-radius: 50%;
+      width: 2.2rem;
+      height: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .user-avatar {
+      width: 3.2rem;
+      height: 3.2rem;
+      border-radius: 50%;
+      background: #cdebe7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .trending-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+    }
+
+    .trending-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    .trending-pills {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+
+    .pill {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 0.6rem 1.2rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+    }
+
+    .pill:hover {
+      background: #fcfbf7;
+      border-color: #d8d4cb;
+      color: var(--text);
+    }
+
+    .bubble.secondary {
+      color: var(--text-muted);
+      background: #f4f6f8;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    /* status line lives outside scene-wrapper, below everything */
+    .status-row {
+      margin-top: 1rem;
+    }
+
+    .summon-btn {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--pink);
+      color: white;
+      border: none;
+      width: 100px;
+      height: 100px;
+      border-radius: 26px;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, background 0.2s, opacity 0.4s ease;
+      letter-spacing: 0.005em;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      white-space: nowrap;
+    }
+
+    .summon-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px -10px rgba(235, 74, 141, 0.55);
+    }
+
+    .summon-btn:active {
+      transform: scale(0.96) translateY(0);
+    }
+
+    .summon-btn.is-summoning {
+      pointer-events: none;
+      background: #d04079;
+    }
+
+    .summon-btn.is-summoning::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.25) 50%, transparent 65%);
+      animation: shimmer 1.6s ease-in-out;
+    }
+
+    @keyframes shimmer {
+      from {
+        transform: translateX(-100%);
+      }
+
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    .status {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      height: 1em;
+    }
+
+    .reset-btn {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 500;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      padding: 0.7rem 1.6rem;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, color 0.2s;
+    }
+
+    .reset-btn:hover {
+      color: var(--pink);
+      border-color: var(--pink);
+      transform: translateY(-1px);
+    }
+
+    .reset-btn:active {
+      transform: scale(0.96) translateY(0);
+    }
+
+    .reset-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    footer.note {
+      text-align: center;
+      padding: 1.5rem 2rem 2.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer.note em {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--text);
+    }
+
+    /* ====================================================================
+   ORACLE — base & state styles
+   ==================================================================== */
+
+    .oracle .container-bg {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+    }
+
+    .oracle .pixel-static,
+    .oracle .pixel-flicker {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      shape-rendering: crispEdges;
+    }
+
+    /* Flicker pixels NOT in resting state are kept hidden by SVG attribute opacity="0".
+   No CSS rule needed during summoning — they stay invisible naturally. */
+
+    /* ----- SUMMONING ----- */
+    .oracle-stage.summoning .container-bg {
+      animation: portal-iris 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .oracle-stage.summoning .pixel-static,
+    .oracle-stage.summoning .pixel-flicker.in-resting {
+      animation: pixel-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation-delay: var(--bloom-delay, 0.85s);
+    }
+
+    /* ----- ALIVE (loop running via SMIL) ----- */
+    .oracle-stage.alive .container-bg {
+      opacity: 1;
+    }
+
+    .oracle-stage.alive .pixel-static {
+      opacity: 1;
+    }
+
+    /* No CSS rule on .pixel-flicker during alive — SVG attribute + SMIL control opacity */
+
+    /* ====================================================================
+   KEYFRAMES
+   ==================================================================== */
+
+    @keyframes portal-iris {
+      0% {
+        opacity: 0;
+        rx: 35;
+        ry: 35;
+        transform: scale(0);
+      }
+
+      100% {
+        opacity: 1;
+        rx: 18;
+        ry: 18;
+        transform: scale(1);
+      }
+    }
+
+
+
+    @keyframes pixel-pop {
+      0% {
+        opacity: 0;
+        transform: scale(0.15);
+      }
+
+      55% {
+        opacity: 1;
+        transform: scale(1.3);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .oracle .container-bg,
+      .oracle .pixel-static,
+      .oracle .pixel-flicker.in-resting {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+
+      .oracle .pixel-flicker {
+        animation: none !important;
+      }
+
+
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+    <p class="kicker"><img src="union-jack.png" alt="UK Flag" class="kicker-flag">Welcome to State • United Kingdom</p>
+    <h1>Master Your Political Power</h1>
+    <p class="lead">State arms you with the right information to understand your political potential, the access to
+      reach the right decision-makers, and the collective force to really change what matters to you.</p>
+
+    <!-- Scene: intro-panel and oracle-panel share the same fixed space -->
+    <div class="scene-wrapper">
+
+      <!-- Panel A: GIF + CTA button -->
+      <div class="intro-panel">
+        <img src="Group_1_V.2_optimize.gif" alt="Animation" class="hero-gif">
+        <div class="button-group">
+          <button class="summon-btn">Let's Go!</button>
+        </div>
+      </div>
+
+      <!-- Panel B: Oracle animation + reset -->
+      <div class="oracle-panel">
+        <div class="summoning-text">Summoning the oracle</div>
+        <div class="chat-interface">
+          <div class="oracle-stage" data-variant="portal">
+            <svg class="oracle" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+          <div class="chat-bubbles">
+            <div class="bubble">I am the Oracle. 🙏<br>Tell me what matters to you, and I will guide you to the right place.
+            </div>
+          </div>
+        </div>
+
+        <!-- User Interaction Zone (Fades in after chat) -->
+        <div class="user-interaction-zone">
+          <div class="input-row">
+            <div class="input-wrapper">
+              <input type="text" placeholder="Start typing" class="user-input-field">
+              <button class="submit-btn">↑</button>
+            </div>
+            <div class="user-avatar">You</div>
+          </div>
+
+          <div class="trending-section">
+            <div class="trending-label">Trending with others</div>
+            <div class="trending-pills">
+              <button class="pill">Speeding cars outside the local school</button>
+              <button class="pill">Streetlights broken for months on my road</button>
+              <button class="pill">Anti-social behaviour at bus stop every evening</button>
+              <button class="pill">Who do I report missed bin collection to</button>
+            </div>
+          </div>
+        </div>
+        <div class="button-group" style="margin-top:1.5rem;">
+          <button class="reset-btn">Reset</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Status line sits below the scene, never moves -->
+    <p class="status status-row" aria-live="polite"></p>
+  </main>
+
+  <footer class="note">
+    Click <em>Let's get going</em> to summon · <em>Reset</em> to start over · loop driven by the original <em>SMIL</em>
+    cycle
+  </footer>
+
+  <script>
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    // ============================================================
+    // ORACLE DATA — extracted from the original blob-animation.svg
+    // ============================================================
+
+    // Always-on core pixels (no SMIL in original)
+    const STATIC_PIXELS = [
+      [27, 31], [27, 35], [31, 27], [31, 31], [31, 35], [31, 39],
+      [35, 27], [35, 31], [35, 35], [35, 39], [39, 31], [39, 35],
+    ];
+
+    // Flicker pixels with their SMIL keyframe values + initial opacity
+    // Each `values` array has 48 frames matching the original's keyTimes.
+    const FLICKER_PIXELS = [
+      { x: 19, y: 31, init: 0, values: "0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 19, y: 35, init: 0, values: "0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 23, y: 23, init: 0, values: "0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 23, y: 27, init: 1, values: "1;1;1;1;1;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0" },
+      { x: 23, y: 31, init: 1, values: "1;1;1;1;1;1;1;1;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;1" },
+      { x: 23, y: 35, init: 1, values: "1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1" },
+      { x: 23, y: 39, init: 0, values: "0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;0;0;0;0;0;0" },
+      { x: 23, y: 43, init: 0, values: "0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 27, y: 23, init: 1, values: "1;1;1;0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;1;1" },
+      { x: 27, y: 27, init: 1, values: "1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;1;1;1;1" },
+      { x: 27, y: 39, init: 1, values: "1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1" },
+      { x: 27, y: 43, init: 0, values: "0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;1;1;1;1;1;0;0;0;0" },
+      { x: 31, y: 19, init: 0, values: "0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0" },
+      { x: 31, y: 23, init: 1, values: "1;1;1;1;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1" },
+      { x: 31, y: 43, init: 0, values: "0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1" },
+      { x: 31, y: 47, init: 0, values: "0;0;0;0;0;0;0;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 35, y: 19, init: 0, values: "0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;0" },
+      { x: 35, y: 23, init: 1, values: "1;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1" },
+      { x: 35, y: 43, init: 1, values: "1;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1" },
+      { x: 35, y: 47, init: 0, values: "0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 39, y: 23, init: 0, values: "0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0" },
+      { x: 39, y: 27, init: 0, values: "0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0" },
+      { x: 39, y: 39, init: 1, values: "1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1" },
+      { x: 39, y: 43, init: 1, values: "1;1;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;0;0;0;0;1;1;1;1;1" },
+      { x: 43, y: 23, init: 0, values: "0;0;0;0;0;0;0;0;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0" },
+      { x: 43, y: 27, init: 0, values: "0;0;0;0;0;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0" },
+      { x: 43, y: 31, init: 0, values: "0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0" },
+      { x: 43, y: 35, init: 1, values: "1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;1" },
+      { x: 43, y: 39, init: 1, values: "1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;1;1" },
+      { x: 43, y: 43, init: 1, values: "1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1" },
+      { x: 47, y: 31, init: 0, values: "0;0;0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+      { x: 47, y: 35, init: 0, values: "0;0;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0" },
+    ];
+
+    // keyTimes string used by all SMIL animations (48 evenly-spaced frames over the 8.976s cycle)
+    const KEY_TIMES = Array.from({ length: 48 }, (_, i) => (i / 48).toFixed(4)).join(';');
+
+    // Centre of the resting blob, in viewBox units
+    const CENTRE_X = 35, CENTRE_Y = 35;
+
+    // Compute distance of a pixel's centre from the resting-blob centre
+    const dist = (x, y) => Math.hypot(x + 2 - CENTRE_X, y + 2 - CENTRE_Y);
+
+    // Build the ordered list of pixels visible at frame 0 (the resting state),
+    // sorted by distance for the radial bloom.
+    function restingPixels() {
+      const all = [
+        ...STATIC_PIXELS.map(([x, y]) => ({ x, y, kind: 'static' })),
+        ...FLICKER_PIXELS.filter(p => p.init === 1).map(p => ({ x: p.x, y: p.y, kind: 'outer' })),
+      ];
+      return all.map(p => ({ ...p, d: dist(p.x, p.y) })).sort((a, b) => a.d - b.d);
+    }
+
+    // Map distance bands to base delays (seconds from start of summon)
+    // Centre pixels appear right when the portal opens (~0.85s).
+    function bloomDelay(d) {
+      const base = {
+        2.83: 0.85,
+        6.32: 0.97,
+        8.49: 1.08,
+        10.20: 1.18,
+        11.66: 1.28,
+        14.14: 1.40,
+      };
+      let nearest = Object.keys(base).reduce((best, key) =>
+        Math.abs(parseFloat(key) - d) < Math.abs(parseFloat(best) - d) ? key : best,
+        Object.keys(base)[0]);
+      return base[nearest];
+    }
+
+    // ============================================================
+    // BUILD ORACLE SVG
+    // ============================================================
+
+    function buildOracle(stage) {
+      const svg = stage.querySelector('.oracle');
+      svg.innerHTML = '';
+
+      // Defs: clipPath + gradient for the spark
+      const defs = document.createElementNS(SVG_NS, 'defs');
+      const clipId = 'oracle-clip';
+      const clipPath = document.createElementNS(SVG_NS, 'clipPath');
+      clipPath.setAttribute('id', clipId);
+      const clipRect = document.createElementNS(SVG_NS, 'rect');
+      clipRect.setAttribute('x', '0'); clipRect.setAttribute('y', '0');
+      clipRect.setAttribute('width', '70'); clipRect.setAttribute('height', '70');
+      clipRect.setAttribute('rx', '18'); clipRect.setAttribute('ry', '18');
+      clipPath.appendChild(clipRect);
+      defs.appendChild(clipPath);
+
+      // Soft radial gradient for the spark: white-hot core → pink → transparent
+      const grad = document.createElementNS(SVG_NS, 'radialGradient');
+      grad.setAttribute('id', 'spark-grad');
+      grad.innerHTML = `
+    <stop offset="0%" stop-color="#fff8fb" stop-opacity="1"/>
+    <stop offset="35%" stop-color="#eb4a8d" stop-opacity="0.95"/>
+    <stop offset="100%" stop-color="#eb4a8d" stop-opacity="0"/>
+  `;
+      defs.appendChild(grad);
+      svg.appendChild(defs);
+
+      // Container background (the rounded grey rect — the "portal")
+      const bg = document.createElementNS(SVG_NS, 'rect');
+      bg.setAttribute('class', 'container-bg');
+      bg.setAttribute('x', '0'); bg.setAttribute('y', '0');
+      bg.setAttribute('width', '70'); bg.setAttribute('height', '70');
+      bg.setAttribute('rx', '18'); bg.setAttribute('ry', '18');
+      bg.setAttribute('fill', '#e8e8e8');
+      svg.appendChild(bg);
+
+      // Clipped content layer
+      const content = document.createElementNS(SVG_NS, 'g');
+      content.setAttribute('clip-path', `url(#${clipId})`);
+      svg.appendChild(content);
+
+
+
+      // Build a Set for quick lookup of resting pixels (so we can mark them in the radial bloom)
+      const ordered = restingPixels();
+      const restingKeys = new Set(ordered.map(p => `${p.x},${p.y}`));
+
+      // Render flicker pixels first (so static draws on top in DOM order, though they don't overlap)
+      FLICKER_PIXELS.forEach(p => {
+        const rect = document.createElementNS(SVG_NS, 'rect');
+        rect.setAttribute('class', `pixel-flicker ${p.init === 1 ? 'in-resting' : ''}`.trim());
+        rect.setAttribute('x', p.x); rect.setAttribute('y', p.y);
+        rect.setAttribute('width', '4.2'); rect.setAttribute('height', '4.2');
+        rect.setAttribute('fill', '#eb4a8d');
+        // Attribute opacity = 0 for now; will be set to `init` value just before SMIL begins
+        rect.setAttribute('opacity', '0');
+
+        // For init=1 pixels (in-resting), give them a bloom delay
+        if (p.init === 1) {
+          rect.style.setProperty('--bloom-delay', `${bloomDelay(dist(p.x, p.y))}s`);
+        }
+
+        // Embed the SMIL animation, but with begin="indefinite" so it doesn't auto-start.
+        // JS will trigger it via beginElement() when entering the alive state.
+        const anim = document.createElementNS(SVG_NS, 'animate');
+        anim.setAttribute('attributeName', 'opacity');
+        anim.setAttribute('calcMode', 'discrete');
+        anim.setAttribute('values', p.values);
+        anim.setAttribute('keyTimes', KEY_TIMES);
+        anim.setAttribute('dur', '8.976s');
+        anim.setAttribute('repeatCount', 'indefinite');
+        anim.setAttribute('begin', 'indefinite');
+        rect.appendChild(anim);
+
+        // Stash init for later restoration
+        rect.dataset.init = p.init;
+
+        content.appendChild(rect);
+      });
+
+      // Static pixels — bloom delay based on distance from centre
+      STATIC_PIXELS.forEach(([x, y]) => {
+        const rect = document.createElementNS(SVG_NS, 'rect');
+        rect.setAttribute('class', 'pixel-static');
+        rect.setAttribute('x', x); rect.setAttribute('y', y);
+        rect.setAttribute('width', '4.2'); rect.setAttribute('height', '4.2');
+        rect.setAttribute('fill', '#eb4a8d');
+        rect.style.setProperty('--bloom-delay', `${bloomDelay(dist(x, y))}s`);
+        content.appendChild(rect);
+      });
+    }
+
+    // ============================================================
+    // SUMMON / TRANSITION TO ALIVE
+    // ============================================================
+
+    // Total intro = portal-iris (1.2s) + bloom (~1.1s) + settle
+    const SUMMON_DURATION_MS = 2150;
+
+    function summon(stage) {
+      // Reset state cleanly
+      stage.classList.remove('summoning', 'alive');
+      stage.querySelectorAll('.pixel-flicker').forEach(rect => {
+        rect.setAttribute('opacity', '0');
+      });
+      // Force reflow so animations restart
+      void stage.offsetWidth;
+      setStatus('');
+
+      // Begin portal + bloom sequence immediately
+      stage.classList.add('summoning');
+
+      // After everything settles, hand off to SMIL
+      clearTimeout(stage._aliveTimer);
+      stage._aliveTimer = setTimeout(() => {
+        transitionToAlive(stage);
+      }, SUMMON_DURATION_MS);
+    }
+
+    function transitionToAlive(stage) {
+      // 1. Set SVG opacity attribute on each flicker pixel to its frame-0 value.
+      stage.querySelectorAll('.pixel-flicker').forEach(rect => {
+        rect.setAttribute('opacity', rect.dataset.init);
+      });
+
+      // 2. Swap classes: .summoning → .alive
+      stage.classList.remove('summoning');
+      stage.classList.add('alive');
+
+      // 3. Trigger every SMIL animation to begin from frame 0, simultaneously
+      stage.querySelectorAll('animate').forEach(anim => {
+        try { anim.beginElement(); } catch (e) { /* SMIL not supported */ }
+      });
+
+      // Update UI — show reset button
+      setStatus('');
+      // 4. Trigger the scale-down and chat reveal after a brief "hero" moment
+      setTimeout(() => {
+        oraclePanel.classList.add('is-chatting');
+      }, 200);
+
+      // 5. Fade in the input section once the chat bubble has appeared
+      setTimeout(() => {
+        oraclePanel.classList.add('is-ready');
+      }, 700);
+
+      // 6. Fade in the reset button
+      setTimeout(() => {
+        resetBtn.classList.add('visible');
+      }, 1000);
+    }
+
+    function resetOracle(stage) {
+      // Stop any pending alive timer
+      clearTimeout(stage._aliveTimer);
+
+      // End all SMIL animations
+      stage.querySelectorAll('animate').forEach(anim => {
+        try { anim.endElement(); } catch (e) { }
+      });
+
+      // Hide oracle panel (start fade out)
+      oraclePanel.classList.remove('visible');
+      resetBtn.classList.remove('visible');
+      setStatus('');
+
+      // Wait for fade-out to complete before resetting states
+      setTimeout(() => {
+        oraclePanel.classList.remove('is-chatting', 'is-ready');
+        stage.classList.remove('summoning', 'alive');
+        stage.querySelectorAll('.pixel-flicker').forEach(rect => {
+          rect.setAttribute('opacity', '0');
+        });
+
+        // Restore intro panel
+        introPanel.classList.remove('fade-out');
+      }, 500);
+    }
+
+    function setStatus(text) {
+      document.querySelector('.status').textContent = text;
+    }
+
+    // ============================================================
+    // WIRING
+    // ============================================================
+
+    const stage = document.querySelector('.oracle-stage');
+    const btn = document.querySelector('.summon-btn');
+    const resetBtn = document.querySelector('.reset-btn');
+    const introPanel = document.querySelector('.intro-panel');
+    const oraclePanel = document.querySelector('.oracle-panel');
+
+    buildOracle(stage);
+
+    btn.addEventListener('click', () => {
+      // Fade the entire intro panel out
+      introPanel.classList.add('fade-out');
+
+      // After fade completes, reveal oracle panel and begin summoning
+      setTimeout(() => {
+        oraclePanel.classList.add('visible');
+        summon(stage);
+      }, 500);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      resetOracle(stage);
+    });
+  </script>
+</body>
+
+</html>
